@@ -1,0 +1,52 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+.venv/
+ENV/
+
+# Data & Models (keep baseline examples, ignore transient runtime data)
+data/runtime/
+*.joblib
+telemetry.csv
+features.csv
+*.db
+*.sqlite
+*.sqlite3
+
+# Logs
+*.log
+logs.txt
+
+# Environment variables
+.env
+.env.local
+
+# Next.js & Frontend Node
+.next/
+frontend/.next/
+out/
+build/
+frontend/node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Legacy & Scratch
+legacy/
+scratch/
+
+# IDE & OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Frontend
+frontend/node_modules/
+frontend/dist/
+*.db

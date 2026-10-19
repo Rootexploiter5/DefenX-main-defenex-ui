@@ -1,0 +1,21 @@
+{
+  "name": "defenx-platform",
+  "version": "1.0.0",
+  "description": "AI-Based Real-Time Anomaly Detection System for Personal Device Security",
+  "scripts": {
+    "dev": "python run.py",
+    "start": "python run.py",
+    "test": "python -m pytest -v",
+    "frontend": "npm run dev --prefix frontend",
+    "build": "npm run build --prefix frontend"
+  },
+  "keywords": [
+    "cybersecurity",
+    "anomaly-detection",
+    "isolation-forest",
+    "fastapi",
+    "react"
+  ],
+  "author": "DefenX",
+  "license": "MIT"
+}
