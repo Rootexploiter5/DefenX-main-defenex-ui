@@ -19,20 +19,25 @@ export function SystemResources() {
     { i: Wifi, l: "Network Traffic", v: rate(r.network_bytes_per_sec) },
   ] : [];
   return (
-    <section className="panel-light p-4" aria-label="System resources">
-      <PanelTitle icon={Cpu} right={<span className="flex items-center gap-1.5 text-xs"><span className={`size-2 rounded-full ${r ? "bg-emerald-500" : "bg-red-500"}`} />{r ? "Live" : "Offline"}</span>}>System Resources</PanelTitle>
+    <section className="glass-panel p-4" aria-label="System resources">
+      <PanelTitle icon={Cpu} right={
+        <span className="flex items-center gap-1.5 font-mono text-[10px] text-[var(--text-muted)]">
+          <span className={`size-2 rounded-full ${r ? "bg-emerald-400 shadow-[0_0_8px_#10b981]" : "bg-red-400 shadow-[0_0_8px_#ef4444]"}`} />
+          {r ? "TELEMETRY LINKED" : "OFFLINE"}
+        </span>
+      }>System Resources</PanelTitle>
       {resources.loading ? <Skeleton className="h-[150px]" /> : !r ? (
-        <p className="p-4 text-sm text-[var(--ink-soft)]" role="alert">Resource readings unavailable: backend unreachable.</p>
+        <p className="p-4 text-sm text-[var(--text-muted)]" role="alert">Resource readings unavailable: backend unreachable.</p>
       ) : (
         <div className="flex items-center gap-3">
           <div className="grid grid-cols-2 gap-2">
             {gauges.map((g) => <Gauge key={g.l} value={g.v} size={74} stroke={6} label={g.l} warn={g.warn} sub={g.v === null ? "" : undefined} />)}
           </div>
-          <ul className="flex-1 divide-y divide-[var(--surface-line)] text-xs">
+          <ul className="flex-1 divide-y divide-white/[0.06] text-xs">
             {details.map(({ i: I, l, v }) => (
               <li key={l} className="flex items-center gap-2 py-1.5">
-                <span className="grid size-7 place-items-center rounded-md bg-[#D9AD62]/20 text-[#98662D]"><I size={15} /></span>
-                <span className="leading-tight"><span className="block text-[10px] text-[var(--ink-soft)]">{l}</span><b className="text-[13px]">{v}</b></span>
+                <span className="grid size-7 place-items-center rounded-lg border border-[#D9AD62]/30 bg-[#4b1027]/40 text-[#ffe2a0]"><I size={14} /></span>
+                <span className="leading-tight"><span className="block text-[10px] text-[var(--text-muted)]">{l}</span><b className="text-[13px] text-[var(--text-primary)]">{v}</b></span>
               </li>
             ))}
           </ul>

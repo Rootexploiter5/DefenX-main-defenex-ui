@@ -18,21 +18,21 @@ export function MonitoredDevices({ onSeeAll, onOpen, limit = 4 }: { onSeeAll?: (
   const { devices } = useStore();
   const list = (devices.data ?? []).slice(0, limit);
   return (
-    <section className="panel-light p-4" aria-label="Monitored devices">
-      <PanelTitle icon={Laptop} right={onSeeAll && <button onClick={onSeeAll} className="flex items-center gap-1 text-xs">See All <ArrowRight size={13} /></button>}>Monitored Devices</PanelTitle>
+    <section className="glass-panel p-4" aria-label="Monitored devices">
+      <PanelTitle icon={Laptop} right={onSeeAll && <button onClick={onSeeAll} className="flex items-center gap-1 font-mono text-xs text-[var(--gold)] hover:text-[#ffe2a0]">See All <ArrowRight size={13} /></button>}>Monitored Devices</PanelTitle>
       {devices.loading ? <Skeleton className="h-[130px]" /> : devices.error ? <EmptyState title="Devices unavailable" body="The backend could not be reached." />
         : list.length === 0 ? <EmptyState title="No devices registered" body="A device appears here once its agent sends telemetry." /> : (
-        <ul className="divide-y divide-[var(--surface-line)]">
+        <ul className="divide-y divide-white/[0.06]">
           {list.map((d) => {
             const [label, color] = stateLabel[d.status];
             return (
               <li key={d.id}>
-                <button onClick={() => onOpen(d.id)} className="flex w-full items-center gap-3 py-2 text-left" aria-label={`Open details for ${d.name}`}>
-                  <span className="grid size-9 place-items-center rounded-lg bg-[#D9AD62]/20 text-[#98662D]"><DeviceIcon p={d.platform} /></span>
-                  <span className="min-w-0 flex-1 leading-tight"><b className="block truncate text-[13px]">{d.name}</b><span className="text-[11px] text-[var(--ink-soft)]">{d.platform}</span></span>
-                  <span className="text-right text-[11px] leading-tight"><span className="flex items-center justify-end gap-1.5 font-medium"><i className="size-2 rounded-full" style={{ background: color }} />{label}</span>
-                    <span className="text-[var(--ink-soft)]">Last seen: {timeAgo(d.last_seen_at)}</span></span>
-                  <ChevronRight size={16} className="text-[var(--ink-soft)]" />
+                <button onClick={() => onOpen(d.id)} className="flex w-full items-center gap-3 py-2 text-left transition hover:bg-white/[0.02] rounded-lg px-1.5" aria-label={`Open details for ${d.name}`}>
+                  <span className="grid size-9 place-items-center rounded-xl border border-[#D9AD62]/30 bg-[#4b1027]/40 text-[#ffe2a0]"><DeviceIcon p={d.platform} /></span>
+                  <span className="min-w-0 flex-1 leading-tight"><b className="block truncate text-[13px] text-[var(--text-primary)]">{d.name}</b><span className="text-[11px] text-[var(--text-muted)] font-mono">{d.platform}</span></span>
+                  <span className="text-right text-[11px] leading-tight"><span className="flex items-center justify-end gap-1.5 font-medium text-[var(--text-primary)]"><i className="size-2 rounded-full shadow-[0_0_6px_currentColor]" style={{ background: color, color }} />{label}</span>
+                    <span className="text-[10px] text-[var(--text-muted)] font-mono">Last seen: {timeAgo(d.last_seen_at)}</span></span>
+                  <ChevronRight size={16} className="text-[var(--text-muted)]" />
                 </button>
               </li>
             );

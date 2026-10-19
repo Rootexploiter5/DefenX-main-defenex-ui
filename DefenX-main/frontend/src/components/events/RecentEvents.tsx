@@ -7,8 +7,11 @@ import { PanelTitle } from "../metrics/SecurityOverview";
 import type { Severity } from "../../types";
 
 export const sevStyle: Record<Severity, string> = {
-  Critical: "bg-[#D9233D]/20 text-[#9d1429]", High: "bg-[#D9233D]/15 text-[#B01C32]",
-  Medium: "bg-[#D99027]/20 text-[#8a5410]", Low: "bg-[#20834A]/15 text-[#17663a]", Informational: "bg-slate-300/40 text-slate-700",
+  Critical: "border border-red-500/40 bg-red-500/20 text-red-300 font-mono",
+  High: "border border-red-500/30 bg-red-500/15 text-red-300 font-mono",
+  Medium: "border border-amber-500/40 bg-amber-500/20 text-amber-300 font-mono",
+  Low: "border border-emerald-500/40 bg-emerald-500/20 text-emerald-300 font-mono",
+  Informational: "border border-slate-500/30 bg-slate-500/10 text-slate-300 font-mono",
 };
 
 export function RecentEvents({ onSeeAll, limit = 5 }: { onSeeAll?: () => void; limit?: number }) {
@@ -24,25 +27,26 @@ export function RecentEvents({ onSeeAll, limit = 5 }: { onSeeAll?: () => void; l
   }, [events.data, sev, search, desc, limit]);
 
   return (
-    <section className="panel-light p-4" aria-label="Recent security events">
+    <section className="glass-panel p-4" aria-label="Recent security events">
       <PanelTitle icon={ShieldAlert} right={
         <span className="flex items-center gap-2">
-          <select value={sev} onChange={(e) => setSev(e.target.value)} aria-label="Filter by severity" className="rounded-md border border-[#D9AD62]/50 bg-[var(--surface)] px-1.5 py-0.5 text-[11px]">
-            {["All", "Critical", "High", "Medium", "Low"].map((s) => <option key={s}>{s}</option>)}
+          <select value={sev} onChange={(e) => setSev(e.target.value)} aria-label="Filter by severity" className="rounded-lg border border-[#D9AD62]/40 bg-black/50 px-2 py-0.5 font-mono text-[11px] text-[var(--text-primary)] outline-none">
+            {["All", "Critical", "High", "Medium", "Low"].map((s) => <option key={s} value={s} className="bg-[#11121a] text-white">{s}</option>)}
           </select>
-          {onSeeAll && <button onClick={onSeeAll} className="flex items-center gap-1 text-xs">See All <ArrowRight size={13} /></button>}
+          {onSeeAll && <button onClick={onSeeAll} className="flex items-center gap-1 font-mono text-xs text-[var(--gold)] hover:text-[#ffe2a0]">See All <ArrowRight size={13} /></button>}
         </span>}>Recent Security Events</PanelTitle>
       {events.loading ? <Skeleton className="h-[130px]" /> : events.error ? <EmptyState title="Events unavailable" body="The backend could not be reached." />
         : rows.length === 0 ? <EmptyState title="No events" body={search || sev !== "All" ? "No events match the current filter." : "No alerts have been recorded yet."} /> : (
         <table className="w-full text-xs">
-          <thead><tr className="text-left text-[11px] text-[var(--ink-soft)]">
-            <th scope="col" className="pb-1"><button onClick={() => setDesc(!desc)} aria-label="Sort by time">Time {desc ? "↓" : "↑"}</button></th>
-            <th scope="col">Event</th><th scope="col" className="text-right">Severity</th></tr></thead>
-          <tbody>{rows.map((e) => (
-            <tr key={e.id} className="border-t border-[var(--surface-line)]">
-              <td className="py-1.5 pr-2 tabular-nums">{clock(e.time)}</td>
-              <td className="pr-2" title={`${e.source} · ${e.status}`}><span className="line-clamp-1">{e.event}</span></td>
-              <td className="text-right"><span className={`rounded-md px-2.5 py-0.5 text-[11px] font-medium ${sevStyle[e.severity]}`}>{e.severity}</span></td>
+          <thead><tr className="text-left font-mono text-[10px] text-[var(--text-muted)]">
+            <th scope="col" className="pb-1.5"><button onClick={() => setDesc(!desc)} aria-label="Sort by time" className="hover:text-[var(--gold)]">Time {desc ? "↓" : "↑"}</button></th>
+            <th scope="col" className="pb-1.5">Event</th>
+            <th scope="col" className="pb-1.5 text-right">Severity</th></tr></thead>
+          <tbody className="divide-y divide-white/[0.06]">{rows.map((e) => (
+            <tr key={e.id} className="transition-colors hover:bg-white/[0.02]">
+              <td className="py-2 pr-2 font-mono text-[11px] text-[var(--text-muted)] tabular-nums">{clock(e.time)}</td>
+              <td className="pr-2 font-medium text-[var(--text-primary)]" title={`${e.source} · ${e.status}`}><span className="line-clamp-1">{e.event}</span></td>
+              <td className="text-right"><span className={`rounded-md px-2 py-0.5 text-[10px] ${sevStyle[e.severity]}`}>{e.severity}</span></td>
             </tr>))}
           </tbody>
         </table>

@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
-import { Download, Loader2, Sparkles } from "lucide-react";
+import { Download, Loader2, Sparkles, Terminal } from "lucide-react";
 import { useStore } from "../app/store";
 import { AssistantPanel } from "../components/assistant/AssistantPanel";
 import { AnomalyChart } from "../components/charts/AnomalyChart";
@@ -10,33 +10,39 @@ import { EmptyState, Skeleton } from "../components/layout/Skeleton";
 import { Gauge } from "../components/metrics/Gauge";
 import { SystemResources } from "../components/metrics/SystemResources";
 import { ThreatMap } from "../components/threat-map/ThreatMap";
+import { ProcessForensicDrawer } from "../components/forensics/ProcessForensicDrawer";
 import { clock, timeAgo } from "../hooks/format";
 import { usePoll } from "../hooks/usePoll";
 import { api } from "../services/api";
+import type { LiveProcess } from "../types";
 
 const Card = ({ title, children, right }: { title: string; children: React.ReactNode; right?: React.ReactNode }) => (
-  <section className="panel-light p-4">
-    <div className="mb-3 flex items-center justify-between gap-2"><h2 className="title-serif text-[17px]">{title}</h2>{right}</div>
+  <section className="glass-panel p-4">
+    <div className="mb-3 flex items-center justify-between gap-2"><h2 className="title-serif text-[16px] text-[var(--text-primary)]">{title}</h2>{right}</div>
     {children}
   </section>
 );
 const Input = (p: React.InputHTMLAttributes<HTMLInputElement>) => (
-  <input {...p} className="rounded-lg border border-[#D9AD62]/60 bg-[var(--surface)] px-3 py-1.5 text-sm outline-none" />
+  <input {...p} className="rounded-lg border border-[#D9AD62]/40 bg-black/40 px-3 py-1.5 text-xs text-[var(--text-primary)] placeholder:text-[var(--text-muted)] outline-none focus:border-[var(--gold)]" />
 );
-const th = "pb-1.5 text-left text-[11px] font-medium text-[var(--ink-soft)]";
+const th = "pb-1.5 text-left font-mono text-[10px] text-[var(--text-muted)]";
 
 /* ---- Live Monitor ---- */
 export function LiveMonitor() {
   const { resources } = useStore();
   const hist = useRef<{ t: string; cpu: number; mem: number }[]>([]);
   const [, tick] = useState(0);
+  const [selectedProc, setSelectedProc] = useState<LiveProcess | null>(null);
+
   useEffect(() => {
     const r = resources.data;
     if (!r) return;
     hist.current = [...hist.current, { t: clock(r.timestamp), cpu: r.cpu_percent, mem: r.memory_percent }].slice(-60);
     tick((n) => n + 1);
   }, [resources.data]);
+
   const procs = usePoll(() => api.processes(12), 5000);
+
   return (
     <div className="grid gap-3 lg:grid-cols-2">
       <SystemResources />
@@ -45,23 +51,39 @@ export function LiveMonitor() {
           {hist.current.length < 2 ? <EmptyState title="Collecting readings…" /> : (
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={hist.current} margin={{ left: -20, right: 4, top: 4 }}>
-                <CartesianGrid stroke="rgba(152,102,45,.2)" vertical={false} />
-                <XAxis dataKey="t" tick={{ fontSize: 9 }} minTickGap={40} /><YAxis domain={[0, 100]} tick={{ fontSize: 9 }} />
-                <Tooltip /><Area dataKey="cpu" name="CPU %" stroke="#98662D" fill="#D9AD62" fillOpacity={0.35} isAnimationActive={false} />
-                <Area dataKey="mem" name="Memory %" stroke="#D9233D" fill="#D9233D" fillOpacity={0.15} isAnimationActive={false} />
+                <CartesianGrid stroke="rgba(217,173,98,.15)" vertical={false} />
+                <XAxis dataKey="t" tick={{ fontSize: 9, fill: "#a7a3ad" }} minTickGap={40} /><YAxis domain={[0, 100]} tick={{ fontSize: 9, fill: "#a7a3ad" }} />
+                <Tooltip contentStyle={{ backgroundColor: "#11121a", borderColor: "rgba(217,173,98,0.3)", borderRadius: "8px" }} />
+                <Area dataKey="cpu" name="CPU %" stroke="#D9AD62" fill="#D9AD62" fillOpacity={0.25} isAnimationActive={false} />
+                <Area dataKey="mem" name="Memory %" stroke="#ef4444" fill="#ef4444" fillOpacity={0.15} isAnimationActive={false} />
               </AreaChart>
             </ResponsiveContainer>)}
         </div>
       </Card>
       <div className="lg:col-span-2">
-        <Card title="Top Processes">
+        <Card title="Tactical Process Explorer" right={<span className="font-mono text-[11px] text-[var(--gold)]">Click row for deep forensics</span>}>
           {procs.loading ? <Skeleton className="h-24" /> : !procs.data ? <EmptyState title="Unavailable" body={procs.error ?? ""} /> : (
-            <table className="w-full text-xs"><thead><tr><th className={th}>Process</th><th className={th}>PID</th><th className={th}>CPU %</th><th className={th}>Mem %</th><th className={th}>Flag</th></tr></thead>
-              <tbody>{procs.data.processes.map((p) => (
-                <tr key={p.pid} className="border-t border-[var(--surface-line)]"><td className="py-1">{p.name}</td><td>{p.pid}</td><td>{p.cpu_percent.toFixed(1)}</td><td>{p.memory_percent.toFixed(1)}</td>
-                  <td>{p.is_anomalous ? <span className="text-[#B01C32]">{p.anomaly_label}</span> : "—"}</td></tr>))}</tbody></table>)}
+            <table className="w-full text-xs">
+              <thead><tr><th className={th}>Process</th><th className={th}>PID</th><th className={th}>CPU %</th><th className={th}>Mem %</th><th className={th}>Flag</th><th className={`${th} text-right`}>Action</th></tr></thead>
+              <tbody className="divide-y divide-white/[0.06]">{procs.data.processes.map((p) => (
+                <tr key={p.pid} onClick={() => setSelectedProc(p)} className="cursor-pointer transition hover:bg-white/[0.04]">
+                  <td className="py-2 font-medium text-[var(--text-primary)] flex items-center gap-2">
+                    <Terminal size={14} className="text-[var(--gold)]" />
+                    <span>{p.name}</span>
+                  </td>
+                  <td className="font-mono text-[var(--text-muted)]">{p.pid}</td>
+                  <td className="font-mono text-[var(--text-primary)]">{p.cpu_percent.toFixed(1)}%</td>
+                  <td className="font-mono text-[var(--text-primary)]">{p.memory_percent.toFixed(1)}%</td>
+                  <td>{p.is_anomalous ? <span className="rounded border border-red-500/40 bg-red-500/20 px-1.5 py-0.5 font-mono text-[10px] text-red-300">{p.anomaly_label}</span> : <span className="font-mono text-[10px] text-emerald-400">NORMAL</span>}</td>
+                  <td className="text-right">
+                    <button onClick={(e) => { e.stopPropagation(); setSelectedProc(p); }} className="rounded border border-[var(--gold)]/40 bg-[var(--burgundy)]/40 px-2 py-0.5 font-mono text-[10px] text-[#ffe2a0] hover:bg-[var(--burgundy)]">Inspect</button>
+                  </td>
+                </tr>))}</tbody>
+            </table>)}
         </Card>
       </div>
+
+      <ProcessForensicDrawer process={selectedProc} onClose={() => setSelectedProc(null)} />
     </div>
   );
 }

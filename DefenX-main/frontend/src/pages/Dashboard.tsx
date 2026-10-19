@@ -1,5 +1,6 @@
 import { AssistantPanel } from "../components/assistant/AssistantPanel";
 import { AnomalyChart } from "../components/charts/AnomalyChart";
+import { Oscilloscope } from "../components/charts/Oscilloscope";
 import { MonitoredDevices } from "../components/devices/MonitoredDevices";
 import { RecentEvents } from "../components/events/RecentEvents";
 import { Hero } from "../components/hero/Hero";
@@ -17,6 +18,7 @@ export default function Dashboard({ go }: { go: (p: PageId) => void }) {
         <Hero />
         <AssistantPanel />
       </div>
+      <Oscilloscope />
       <div className="stretch grid gap-3 lg:grid-cols-2 xl:grid-cols-[1fr_1.25fr_1.15fr]">
         <SecurityOverview />
         <AnomalyChart />

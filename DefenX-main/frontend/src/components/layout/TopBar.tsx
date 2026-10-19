@@ -1,68 +1,153 @@
-import { Bell, ChevronDown, Moon, Search, ShieldCheck, ShieldAlert, Sun } from "lucide-react";
-import { useEffect, useRef } from "react";
+import { Bell, ChevronDown, Moon, Search, ShieldCheck, ShieldAlert, Sun, Volume2, VolumeX, Radio } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import { useStore } from "../../app/store";
+import { soundFx } from "../../services/soundFx";
 import type { PageId } from "./Sidebar";
 
 export function TopBar({ onNavigate }: { onNavigate: (p: PageId) => void }) {
-  const { summary, backendUp, search, setSearch, theme, toggleTheme, profile, unread, clearUnread } = useStore();
+  const { summary, backendUp, wsUp, search, setSearch, theme, toggleTheme, profile, unread, clearUnread } = useStore();
   const ref = useRef<HTMLInputElement>(null);
+  const [soundOn, setSoundOn] = useState(() => soundFx.isEnabled());
+  const [utcTime, setUtcTime] = useState("");
+
+  // Live millisecond UTC epoch clock
   useEffect(() => {
-    const h = (e: KeyboardEvent) => { if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k") { e.preventDefault(); ref.current?.focus(); } };
+    let animId: number;
+    const updateClock = () => {
+      const now = new Date();
+      const iso = now.toISOString().replace("T", " ").replace("Z", " UTC");
+      setUtcTime(iso);
+      animId = requestAnimationFrame(updateClock);
+    };
+    animId = requestAnimationFrame(updateClock);
+    return () => cancelAnimationFrame(animId);
+  }, []);
+
+  // Keyboard shortcut Ctrl+K
+  useEffect(() => {
+    const h = (e: KeyboardEvent) => { 
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k") { 
+        e.preventDefault(); 
+        ref.current?.focus(); 
+      } 
+    };
     window.addEventListener("keydown", h);
     return () => window.removeEventListener("keydown", h);
   }, []);
 
+  const handleToggleSound = () => {
+    const next = soundFx.toggle();
+    setSoundOn(next);
+  };
+
   const active = summary.data?.telemetry_active;
-  const status = !backendUp ? { t: "Backend Offline", s: "Cannot reach the DEFENEX API", ok: false }
-    : active ? { t: "System Protected", s: "Real-time monitoring active", ok: true }
-    : { t: "No Telemetry", s: "Agent not reporting", ok: false };
+  const status = !backendUp ? { t: "Backend Offline", s: "API Disconnected", ok: false }
+    : active ? { t: "Protected", s: "Agent Stream Active", ok: true }
+    : { t: "Standby", s: "Waiting for Telemetry", ok: false };
 
   return (
-    <header className="flex flex-wrap items-center gap-3 py-2">
-      <label className="panel-light flex h-[46px] min-w-[240px] flex-1 items-center gap-3 rounded-full px-4">
-        <Search size={18} className="text-[#98662D]" aria-hidden />
-        <input ref={ref} value={search} onChange={(e) => setSearch(e.target.value)}
-          onKeyDown={(e) => { if (e.key === "Enter" && search.trim()) onNavigate("reports"); }}
+    <header className="flex flex-wrap items-center gap-2.5 py-2">
+      {/* Search Bar in Glass Panel */}
+      <label className="glass-panel glass-interactive flex h-[44px] min-w-[260px] flex-1 items-center gap-3 px-4">
+        <Search size={16} className="text-[#d9ad62]" aria-hidden />
+        <input 
+          ref={ref} 
+          value={search} 
+          onChange={(e) => setSearch(e.target.value)}
+          onKeyDown={(e) => { 
+            if (e.key === "Enter" && search.trim()) {
+              soundFx.playClick();
+              onNavigate("reports"); 
+            } 
+          }}
           aria-label="Search threats, devices and logs"
-          placeholder="Search for threats, devices, logs, or ask DEFENEX..."
-          className="w-full bg-transparent text-sm outline-none placeholder:text-[var(--ink-soft)]" />
-        <kbd className="whitespace-nowrap rounded-md border border-[#D9AD62]/50 px-1.5 text-[10px] text-[var(--ink-soft)]">Ctrl K</kbd>
+          placeholder="Search threats, PIDs, IP addresses, or CVE forensics..."
+          className="w-full bg-transparent text-xs text-[#f8f5f0] outline-none placeholder:text-[#a7a3ad]" 
+        />
+        <kbd className="whitespace-nowrap rounded border border-[#d9ad62]/30 bg-black/30 px-1.5 py-0.5 font-mono text-[9.5px] text-[#d9ad62]">Ctrl K</kbd>
       </label>
 
-      <div className="panel-dark flex h-[46px] items-center gap-3 rounded-full px-4" role="status" aria-live="polite">
-        <span className="flex items-center gap-2 text-sm font-medium">
-          <span className={`size-2.5 rounded-full ${active ? "bg-emerald-400 shadow-[0_0_8px_#34d399]" : "bg-red-400"}`} />
-          {active ? "Live" : "Idle"}
+      {/* Live Tactical Time Readout */}
+      <div className="glass-panel hidden h-[44px] items-center gap-2 px-3.5 xl:flex">
+        <Radio size={13} className={`animate-pulse ${wsUp ? "text-emerald-400" : "text-amber-400"}`} />
+        <span className="font-mono text-[11px] font-medium tracking-wide text-[#ffe2a0]">
+          {utcTime || "SYNCING TIME..."}
         </span>
-        <span className="h-6 w-px bg-[#D9AD62]/40" />
+      </div>
+
+      {/* System Status HUD */}
+      <div className="glass-panel flex h-[44px] items-center gap-3 px-3.5" role="status" aria-live="polite">
+        <span className="flex items-center gap-1.5 font-mono text-xs font-semibold text-[#f8f5f0]">
+          <span className={`size-2 rounded-full ${active ? "bg-emerald-400 shadow-[0_0_10px_#10b981]" : "bg-red-400"}`} />
+          {active ? "LIVE" : "IDLE"}
+        </span>
+        <span className="h-4 w-px bg-[#d9ad62]/30" />
         <span className="flex items-center gap-2">
-          {status.ok ? <ShieldCheck size={20} className="text-emerald-400" /> : <ShieldAlert size={20} className="text-red-300" />}
+          {status.ok ? <ShieldCheck size={18} className="text-emerald-400" /> : <ShieldAlert size={18} className="text-red-400" />}
           <span className="leading-tight">
-            <span className="block text-[13px] font-semibold">{status.t}</span>
-            <span className="block text-[10.5px] text-[#D8C2B6]">{status.s}</span>
+            <span className="block text-xs font-semibold text-[#f8f5f0]">{status.t}</span>
+            <span className="block text-[9.5px] text-[#a7a3ad]">{status.s}</span>
           </span>
         </span>
       </div>
 
-      <button onClick={toggleTheme} aria-label={`Switch to ${theme === "light" ? "dark" : "light"} theme`}
-        className="panel-light grid size-[46px] place-items-center rounded-full text-[#98662D]">
-        {theme === "light" ? <Sun size={19} /> : <Moon size={19} />}
+      {/* Optional Sound FX Toggle (User Opt-In) */}
+      <button 
+        onClick={handleToggleSound} 
+        aria-label={soundOn ? "Mute tactical audio feedback" : "Enable tactical Web Audio feedback"}
+        title={soundOn ? "Tactical Audio: Enabled (Click to Mute)" : "Tactical Audio: Muted (Click to Opt-In)"}
+        className="glass-panel glass-interactive grid size-[44px] place-items-center text-[#d9ad62]"
+      >
+        {soundOn ? <Volume2 size={17} className="text-emerald-400" /> : <VolumeX size={17} className="text-[#a7a3ad]" />}
       </button>
-      <button onClick={() => { clearUnread(); onNavigate("reports"); }} aria-label={`Notifications, ${unread} new`}
-        className="panel-light relative grid size-[46px] place-items-center rounded-full text-[#98662D]">
-        <Bell size={19} />
-        {unread > 0 && <span className="absolute right-2 top-2 grid min-w-4 place-items-center rounded-full bg-[#D9233D] px-1 text-[9px] font-bold text-white">{unread}</span>}
+
+      {/* Theme Toggle */}
+      <button 
+        onClick={() => {
+          soundFx.playClick();
+          toggleTheme();
+        }} 
+        aria-label={`Switch to ${theme === "light" ? "dark" : "light"} theme`}
+        className="glass-panel glass-interactive grid size-[44px] place-items-center text-[#d9ad62]"
+      >
+        {theme === "light" ? <Sun size={17} /> : <Moon size={17} />}
       </button>
-      <button onClick={() => onNavigate("settings")} aria-label="Open profile settings"
-        className="panel-dark flex h-[50px] items-center gap-3 rounded-full py-1 pl-1.5 pr-4">
-        <span className="grid size-10 place-items-center rounded-full border-2 border-[#D9AD62] bg-[#570D25] font-display text-lg text-[#FFE2A0]">
+
+      {/* Alerts Bell */}
+      <button 
+        onClick={() => { 
+          soundFx.playClick();
+          clearUnread(); 
+          onNavigate("reports"); 
+        }} 
+        aria-label={`Security alerts, ${unread} new`}
+        className="glass-panel glass-interactive relative grid size-[44px] place-items-center text-[#d9ad62]"
+      >
+        <Bell size={17} />
+        {unread > 0 && (
+          <span className="absolute right-1.5 top-1.5 grid min-w-4 place-items-center rounded-full bg-[#ef4444] px-1 font-mono text-[9px] font-bold text-white shadow-[0_0_8px_#ef4444]">
+            {unread}
+          </span>
+        )}
+      </button>
+
+      {/* Profile Badge */}
+      <button 
+        onClick={() => {
+          soundFx.playClick();
+          onNavigate("settings");
+        }} 
+        aria-label="Open profile settings"
+        className="glass-panel glass-interactive flex h-[44px] items-center gap-2.5 py-1 pl-1.5 pr-3.5"
+      >
+        <span className="grid size-8 place-items-center rounded-full border border-[#d9ad62] bg-[#4b1027] font-display text-xs font-bold text-[#ffe2a0]">
           {profile.name.charAt(0).toUpperCase()}
         </span>
-        <span className="hidden text-left leading-tight sm:block">
-          <span className="block text-[13px] font-semibold">{profile.name}</span>
-          <span className="block text-[10.5px] text-[#D8C2B6]">{profile.plan}</span>
+        <span className="text-left leading-none">
+          <span className="block text-xs font-semibold text-[#f8f5f0]">{profile.name}</span>
+          <span className="block text-[9.5px] text-[#a7a3ad]">{profile.plan}</span>
         </span>
-        <ChevronDown size={16} className="text-[#D9AD62]" />
+        <ChevronDown size={13} className="text-[#a7a3ad]" />
       </button>
     </header>
   );

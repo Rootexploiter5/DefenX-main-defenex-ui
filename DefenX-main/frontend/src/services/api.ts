@@ -42,7 +42,7 @@ export const api = {
     post<{ success: boolean; reply: string; model?: string }>("/ai/chat", { message, conversation_history: history }),
   explainAlert: (id: number) => post<{ success: boolean; analysis: string; error?: string }>(`/ai/explain/${id}`),
   scan: () => post<ScanResult>("/actions/scan"),
-  protect: () => post<{ available: boolean; message: string }>("/actions/protect"),
+  protect: () => post<{ available: boolean; status?: string; message: string; rules_enforced?: string[]; threats_blocked?: number }>("/actions/protect"),
   report: () => req<{ markdown: string }>("/actions/report"),
   updateAlert: (id: number, status: string) =>
     req(`/alerts/${id}`, {
