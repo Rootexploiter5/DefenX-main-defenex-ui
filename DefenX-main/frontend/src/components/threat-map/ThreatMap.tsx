@@ -52,9 +52,18 @@ export function ThreatMap() {
         <div className="relative h-[150px] flex-1 overflow-hidden rounded-xl" role="img" aria-label="World map of threat activity">
           <svg viewBox="0 0 100 100" preserveAspectRatio="none" className="size-full">
             {dots.map((d, i) => <circle key={i} cx={d.x} cy={d.y} r={0.55} fill="#D9AD62" opacity={0.55} />)}
-            {sample && [[22, 35], [48, 28], [70, 38], [52, 55], [80, 62]].map(([x, y], i) => (
-              <circle key={i} cx={x} cy={y} r={1.4} fill={["#D9233D", "#D99027", "#34d399"][i % 3]} />
-            ))}
+            {((live && data?.points) || (sample ? [[22, 35], [48, 28], [70, 38], [52, 55], [80, 62]] : [])).map((pt: any, i: number) => {
+              const x = Array.isArray(pt) ? pt[0] : pt.x;
+              const y = Array.isArray(pt) ? pt[1] : pt.y;
+              const sev = Array.isArray(pt) ? ["High", "Medium", "Low"][i % 3] : pt.severity || "Medium";
+              const col = sev === "High" ? "#D9233D" : sev === "Medium" ? "#D99027" : "#34d399";
+              return (
+                <g key={i}>
+                  <circle cx={x} cy={y} r={2.8} fill={col} opacity={0.35} className="animate-ping" />
+                  <circle cx={x} cy={y} r={1.3} fill={col} />
+                </g>
+              );
+            })}
           </svg>
           {!live && (
             <div className="absolute inset-0 grid place-content-center bg-black/45 p-3 text-center" role="status">

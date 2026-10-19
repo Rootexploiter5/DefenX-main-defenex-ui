@@ -50,7 +50,8 @@ export interface MonitoredDevice {
 }
 
 export interface ThreatSource { country: string; code: string; count: number }
-export interface ThreatMapData { available: boolean; reason?: string; sources: ThreatSource[] }
+export interface ThreatPoint { x: number; y: number; severity: "Low" | "Medium" | "High"; country?: string }
+export interface ThreatMapData { available: boolean; reason?: string; sources: ThreatSource[]; points?: ThreatPoint[] }
 
 export interface OllamaStatus {
   available: boolean; url?: string; active_model?: string | null; models?: string[]; error?: string;

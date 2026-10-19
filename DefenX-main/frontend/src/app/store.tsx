@@ -47,7 +47,21 @@ export function StoreProvider({ children }: { children: ReactNode }) {
 
   useEffect(() =>
     openAlertSocket((m) => {
-      if (m?.alert) { setUnread((n) => n + 1); events.refresh(); summary.refresh(); }
+      if (m?.type === "TELEMETRY_UPDATE") {
+        if (m.telemetry) {
+          resources.refresh();
+          summary.refresh();
+        }
+        if (m.alert) {
+          setUnread((n) => n + 1);
+          events.refresh();
+          devices.refresh();
+        }
+      } else if (m?.alert) {
+        setUnread((n) => n + 1);
+        events.refresh();
+        summary.refresh();
+      }
     }, setWsUp),
   // eslint-disable-next-line react-hooks/exhaustive-deps
   []);

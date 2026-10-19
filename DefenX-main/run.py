@@ -121,7 +121,7 @@ def main():
     # 1. Launch Backend API
     print(f"\n{BLUE}[2/4]{RESET} Starting FastAPI backend on http://127.0.0.1:{API_PORT}...")
     backend_proc = subprocess.Popen(
-        [sys.executable, "-m", "uvicorn", "backend.main:app", "--host", "127.0.0.1", "--port", str(API_PORT)],
+        [sys.executable, "-m", "uvicorn", "backend.main:app", "--host", "127.0.0.1", "--port", str(API_PORT), "--reload"],
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT,
         text=True,
