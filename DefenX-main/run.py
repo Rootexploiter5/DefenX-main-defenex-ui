@@ -28,6 +28,11 @@ RED = "\033[91m"
 BOLD = "\033[1m"
 RESET = "\033[0m"
 
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+os.chdir(BASE_DIR)
+if BASE_DIR not in sys.path:
+    sys.path.insert(0, BASE_DIR)
+
 API_PORT = int(os.environ.get("DEFENX_API_PORT", 8005))
 FRONTEND_PORT = int(os.environ.get("DEFENX_FRONTEND_PORT", 5173))
 os.environ["DEFENX_API_PORT"] = str(API_PORT)
@@ -122,6 +127,7 @@ def main():
     print(f"\n{BLUE}[2/4]{RESET} Starting FastAPI backend on http://127.0.0.1:{API_PORT}...")
     backend_proc = subprocess.Popen(
         [sys.executable, "-m", "uvicorn", "backend.main:app", "--host", "127.0.0.1", "--port", str(API_PORT), "--reload"],
+        cwd=BASE_DIR,
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT,
         text=True,
@@ -133,7 +139,7 @@ def main():
     # 2. Launch Next.js Dashboard
     print(f"{BLUE}[3/4]{RESET} Starting Vite + React DEFENEX console on http://localhost:{FRONTEND_PORT}...")
     npm_cmd = "npm.cmd" if sys.platform == "win32" else "npm"
-    frontend_dir = os.path.join(os.path.dirname(__file__), "frontend")
+    frontend_dir = os.path.join(BASE_DIR, "frontend")
     frontend_proc = subprocess.Popen(
         [npm_cmd, "run", "dev", "--", "--port", str(FRONTEND_PORT)],
         cwd=frontend_dir,
@@ -152,6 +158,7 @@ def main():
     print(f"{BLUE}[4/4]{RESET} Starting Endpoint Security Agent...")
     agent_proc = subprocess.Popen(
         [sys.executable, "-m", "agent.main"],
+        cwd=BASE_DIR,
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT,
         text=True,

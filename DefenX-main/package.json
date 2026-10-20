@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "python run.py",
     "start": "python run.py",
+    "all": "python run.py",
     "test": "python -m pytest -v",
     "frontend": "npm run dev --prefix frontend",
     "build": "npm run build --prefix frontend"

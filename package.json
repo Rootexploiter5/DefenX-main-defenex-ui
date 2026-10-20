@@ -1,0 +1,21 @@
+{
+  "name": "defenx-platform",
+  "version": "1.0.0",
+  "description": "DefenX AI Endpoint Security Platform Launcher",
+  "scripts": {
+    "start": "python run.py",
+    "dev": "python run.py",
+    "all": "python run.py",
+    "backend": "python -m uvicorn backend.main:app --host 127.0.0.1 --port 8005 --reload",
+    "frontend": "npm run dev --prefix DefenX-main/frontend",
+    "test": "pytest -v DefenX-main/tests"
+  },
+  "keywords": [
+    "cybersecurity",
+    "anomaly-detection",
+    "fastapi",
+    "react"
+  ],
+  "author": "DefenX",
+  "license": "MIT"
+}
