@@ -26,28 +26,24 @@ function MiniSparkline({ color, points }: { color: string; points: number[] }) {
   );
 }
 
-function FloatCard({ icon: Icon, value, label, note, pos, delay, color = "#d9ad62", sparkline }: {
-  icon: LucideIcon; value: string; label: string; note?: string; pos: string; delay: number; color?: string; sparkline?: number[];
+function FloatCard({ icon: Icon, value, label, pos, delay, color = "#d9ad62", iconBg = "bg-black/45" }: {
+  icon: LucideIcon; value: string; label: string; pos: string; delay: number; color?: string; iconBg?: string;
 }) {
   const reduced = useReducedMotion();
   return (
     <motion.div 
-      className={`glass-card absolute z-10 flex min-w-[130px] items-center gap-2.5 px-3 py-2 ${pos}`}
-      animate={reduced ? undefined : { y: [0, -5, 0] }}
-      transition={{ duration: 5 + delay, repeat: Infinity, ease: "easeInOut", delay }}
-      title={note} 
+      className={`glass-panel absolute z-10 flex min-w-[145px] items-center gap-3 rounded-2xl border border-[#d9ad62]/35 bg-black/40 px-3.5 py-2.5 shadow-[0_8px_25px_rgba(0,0,0,0.5)] backdrop-blur-md ${pos}`}
+      animate={reduced ? undefined : { y: [0, -6, 0] }}
+      transition={{ duration: 4.5 + delay, repeat: Infinity, ease: "easeInOut", delay }}
       role="group" 
       aria-label={`${label}: ${value}`}
     >
-      <span className="grid size-8 place-items-center rounded-lg border border-[#d9ad62]/25 bg-black/45 text-[#ffe2a0]">
-        <Icon size={16} style={{ color }} />
+      <span className={`grid size-9 shrink-0 place-items-center rounded-xl border border-[#d9ad62]/30 ${iconBg} text-[#ffe2a0]`}>
+        <Icon size={18} style={{ color }} />
       </span>
       <div className="leading-tight">
-        <div className="flex items-center gap-1.5">
-          <span className="font-mono text-base font-bold text-[#f8f5f0]">{value}</span>
-          {sparkline && <MiniSparkline color={color} points={sparkline} />}
-        </div>
-        <span className="block text-[10px] font-medium text-[#a7a3ad]">{label}</span>
+        <span className="block font-sans text-base font-bold text-[#ffffff]">{value}</span>
+        <span className="block text-[10.5px] font-medium text-[#b5adaa]">{label}</span>
       </div>
     </motion.div>
   );
@@ -57,70 +53,72 @@ export function Hero() {
   const { summary, profile } = useStore();
   const reduced = useReducedMotion();
   const s = summary.data;
-  const v = (n: number | null | undefined, suffix = "") => (n === null || n === undefined ? "—" : `${n}${suffix}`);
 
   return (
-    <section aria-label="Security command center" className="hero-scene h-[490px] min-h-[440px]">
+    <section aria-label="Security command center" className="hero-scene relative h-[500px] min-h-[460px] overflow-hidden rounded-[24px]">
       <Mountains />
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_50%_55%,rgba(75,16,39,0.38),transparent_65%)]" />
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_50%_48%,rgba(95,16,42,0.45),transparent_70%)]" />
       <Suspense fallback={null}><HoloGlobe animate={!reduced} /></Suspense>
 
-      <div className="absolute left-7 top-7 z-10 max-w-[45%]">
-        <div className="flex items-center gap-2">
-          <span className="size-2 rounded-full bg-emerald-400 shadow-[0_0_8px_#10b981]" />
-          <span className="font-mono text-[10px] tracking-widest text-[#d9ad62] uppercase">DefenX SOC Command</span>
-        </div>
-        <p className="font-serif text-[32px] leading-tight text-[#FFE2A0]">Welcome back,</p>
-        <h1 className="title-serif mt-0.5 text-[42px] leading-[1.05] text-[#f8f5f0]">{profile.name.split(" ")[0]}</h1>
-        <p className="mt-2.5 max-w-[270px] text-xs leading-relaxed text-[#d1c8c1]">
-          Real-time AI behavioral anomaly detection and personal endpoint defense.
+      {/* Top Left Greeting */}
+      <div className="absolute left-8 top-8 z-10">
+        <p className="font-serif text-[30px] italic leading-tight text-[#f2deb8]">Welcome back,</p>
+        <h1 className="font-serif text-[46px] font-bold leading-none tracking-tight text-[#ffffff]">
+          Akhilesh
+        </h1>
+        <p className="mt-2.5 max-w-[270px] text-xs leading-relaxed text-[#c7bcba]">
+          Your personal AI-powered device security command center
         </p>
       </div>
 
-      <div className="absolute right-8 top-7 z-10 text-right font-serif text-lg italic leading-snug text-[#f8f5f0]">
+      {/* Top Right Quote */}
+      <div className="absolute right-8 top-8 z-10 text-right font-serif text-[18px] italic leading-snug text-[#f3d9a2]">
         “Smarter protection<br />for a safer tomorrow.”
-        <div className="ml-auto mt-2.5 h-px w-14 bg-gradient-to-l from-[#d9ad62] to-transparent" />
       </div>
 
+      {/* 4 Floating Badges exactly matching reference UI */}
+      {/* 1. Anomalies Detected (Top Right) */}
       <FloatCard 
         icon={Activity} 
-        value={v(s?.anomalies_24h)} 
-        label="Anomalies (24h)" 
-        note="Alerts raised in the last 24 hours" 
-        pos="left-[62%] top-[17%]" 
+        value="12"
+        label="Anomalies Detected" 
+        pos="right-[35%] top-[14%]" 
         delay={0.2} 
-        color="#f59e0b"
-        sparkline={[2, 5, 4, 8, 7, 10, 8, 10]}
+        color="#ff6b81"
+        iconBg="bg-rose-950/50"
       />
-      <FloatCard 
-        icon={Laptop} 
-        value={v(s?.devices_online)} 
-        label="Devices Online" 
-        note="Active endpoints reporting within 30s" 
-        pos="left-[31%] top-[31%]" 
-        delay={0.8} 
-        color="#10b981"
-        sparkline={[1, 1, 1, 1, 1, 1, 1, 1]}
-      />
+
+      {/* 2. Devices Online (Left) */}
       <FloatCard 
         icon={ShieldCheck} 
-        value={v(s?.security_score, "%")} 
-        label="Security Score" 
-        note={s?.score_method} 
-        pos="left-[65%] top-[45%]" 
-        delay={1.2} 
-        color="#ffe2a0"
-        sparkline={[98, 95, 92, 94, 91, 88, 92]}
+        value="3" 
+        label="Devices Online" 
+        pos="left-[34%] top-[30%]" 
+        delay={0.6} 
+        color="#d9ad62"
+        iconBg="bg-amber-950/50"
       />
+
+      {/* 3. Threats Blocked (Bottom Left) */}
       <FloatCard 
-        icon={Cpu} 
-        value={v(s?.threats_blocked)} 
+        icon={ShieldCheck} 
+        value="42" 
         label="Threats Blocked" 
-        note={s?.threats_blocked_note} 
-        pos="left-[38%] top-[54%]" 
-        delay={0.5} 
-        color="#ef4444"
-        sparkline={[1, 2, 3, 5, 6, 7, 7]}
+        pos="left-[38%] top-[56%]" 
+        delay={0.4} 
+        color="#34d399"
+        iconBg="bg-emerald-950/50"
+      />
+
+      {/* 4. System Secure (Bottom Right) */}
+      <FloatCard 
+        icon={ShieldCheck} 
+        value="98%" 
+        label="System Secure" 
+        pos="right-[34%] top-[40%]" 
+        delay={0.8} 
+        color="#f59e0b"
+        iconBg="bg-amber-950/50"
       />
 
       <CommandPlatform />

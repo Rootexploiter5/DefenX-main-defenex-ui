@@ -13,19 +13,23 @@ import type { PageId } from "../components/layout/Sidebar";
 export default function Dashboard({ go }: { go: (p: PageId) => void }) {
   const { setSelectedDevice } = useStore();
   return (
-    <div className="space-y-3">
-      <div className="grid gap-3 xl:grid-cols-[minmax(0,1fr)_310px]">
+    <div className="space-y-3.5">
+      {/* Top Section: Hero Command Center + AI Assistant */}
+      <div className="grid gap-3.5 xl:grid-cols-[minmax(0,1fr)_330px]">
         <Hero />
         <AssistantPanel />
       </div>
-      <Oscilloscope />
-      <div className="stretch grid gap-3 lg:grid-cols-2 xl:grid-cols-[1fr_1.25fr_1.15fr]">
+
+      {/* Bottom Section - Row 1: Security Overview, Real-Time Anomaly Analytics, System Resources */}
+      <div className="grid gap-3.5 md:grid-cols-2 xl:grid-cols-3">
         <SecurityOverview />
         <AnomalyChart />
-        <div className="lg:col-span-2 xl:col-span-1"><SystemResources /></div>
+        <SystemResources />
       </div>
-      <div className="stretch grid gap-3 lg:grid-cols-2 xl:grid-cols-[1.1fr_1fr_.85fr]">
-        <div className="lg:col-span-2 xl:col-span-1"><ThreatMap /></div>
+
+      {/* Bottom Section - Row 2: Live Threat Map, Recent Security Events, Monitored Devices */}
+      <div className="grid gap-3.5 md:grid-cols-2 xl:grid-cols-3">
+        <ThreatMap />
         <RecentEvents onSeeAll={() => go("reports")} />
         <MonitoredDevices onSeeAll={() => go("devices")} onOpen={(id) => { setSelectedDevice(id); go("devices"); }} />
       </div>

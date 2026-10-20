@@ -39,7 +39,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const [search, setSearch] = useState("");
   const [theme, setTheme] = useState<"light" | "dark">(() => load("defenex.theme", "light"));
   const [profile, setProfileState] = useState<Profile>(() =>
-    load("defenex.profile", { name: import.meta.env.VITE_USER_NAME || "Operator", plan: "Premium User" }));
+    load("defenex.profile", { name: import.meta.env.VITE_USER_NAME || "Akhilesh A S", plan: "Premium User" }));
   const [selectedDevice, setSelectedDevice] = useState<string | null>(null);
   const [unread, setUnread] = useState(0);
 

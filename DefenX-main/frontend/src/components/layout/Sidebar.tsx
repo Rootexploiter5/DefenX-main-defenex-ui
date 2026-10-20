@@ -27,9 +27,12 @@ export function Sidebar({ page, onNavigate }: { page: PageId; onNavigate: (p: Pa
   };
 
   return (
-    <aside className="sidebar fixed inset-y-0 left-0 z-30 hidden w-[204px] flex-col rounded-r-[28px] lg:flex">
+    <aside className="sidebar fixed inset-y-0 left-0 z-30 hidden w-[210px] flex-col rounded-r-[32px] border-r-2 border-[#d9ad62]/50 shadow-[10px_0_40px_rgba(30,5,15,0.7)] lg:flex">
+      {/* Decorative Golden Ribbon Wave along the right edge */}
+      <div className="pointer-events-none absolute -right-[2px] top-0 bottom-0 w-[4px] bg-gradient-to-b from-[#d9ad62]/10 via-[#d9ad62] to-[#d9ad62]/10 shadow-[0_0_15px_#d9ad62]" />
+
       <Brand />
-      <nav aria-label="Main navigation" className="mt-6 flex flex-col gap-1.5 px-3">
+      <nav aria-label="Main navigation" className="mt-5 flex flex-col gap-1 px-3">
         {NAV.map(({ id, label, icon: Icon }) => {
           const isCurrent = page === id;
           return (
@@ -37,29 +40,28 @@ export function Sidebar({ page, onNavigate }: { page: PageId; onNavigate: (p: Pa
               key={id} 
               onClick={() => handleNav(id)} 
               aria-current={isCurrent ? "page" : undefined}
-              className={`nav-item flex h-[44px] items-center gap-3 rounded-xl px-3.5 text-left text-[13px] font-medium transition-all ${
+              className={`flex h-[42px] items-center gap-2.5 rounded-full px-3 text-left text-[12.5px] transition-all duration-200 ${
                 isCurrent 
-                  ? "border border-[#d9ad62]/40 bg-gradient-to-r from-[#4b1027]/90 to-[#2a0813]/80 text-[#ffe2a0] shadow-[0_0_20px_rgba(75,16,39,0.5)]" 
-                  : "text-[#d1c8c1] hover:bg-white/5 hover:text-white"
+                  ? "border border-[#ffe2a0]/60 bg-gradient-to-r from-[#e5bb68] via-[#d4a24c] to-[#a87428] font-bold text-[#1b0711] shadow-[0_4px_18px_rgba(217,173,98,0.5)]" 
+                  : "font-medium text-[#d8cfcb] hover:bg-white/[0.06] hover:text-white"
               }`}
             >
-              <span className={isCurrent ? "grid size-7 place-items-center rounded-lg bg-[#d9ad62]/20 text-[#ffe2a0]" : "grid size-7 place-items-center text-[#d9ad62]"}>
-                <Icon size={17} />
+              <span className={isCurrent 
+                ? "grid size-6 place-items-center rounded-full bg-[#1b0711]/20 text-[#1b0711]" 
+                : "grid size-6 place-items-center rounded-full border border-[#d9ad62]/50 text-[#d9ad62]"
+              }>
+                <Icon size={13} />
               </span>
-              <span>{label}</span>
+              <span className="truncate">{label}</span>
             </button>
           );
         })}
       </nav>
-      <div className="mt-auto px-6 pb-7">
-        <div className="font-display text-[11px] leading-[2.2] tracking-[0.42em] text-[#d9ad62]/80">
+      <div className="mt-auto px-6 pb-6">
+        <div className="font-display text-[10.5px] leading-[2.1] tracking-[0.45em] text-[#d9ad62]/90">
           PROTECT<br />DETECT<br />ANALYZE<br />PREVENT
         </div>
-        <div className="mt-2.5 h-px w-12 bg-gradient-to-r from-[#d9ad62]/80 to-transparent" />
-        <div className="mt-3 flex items-center gap-2 text-[10px] text-[#a7a3ad]">
-          <ShieldCheck className="text-emerald-400" size={15} aria-hidden />
-          <span>v2.0 Tactical HUD</span>
-        </div>
+        <div className="mt-2 h-px w-12 bg-gradient-to-r from-[#d9ad62] to-transparent" />
       </div>
     </aside>
   );

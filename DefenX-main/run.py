@@ -147,6 +147,7 @@ def main():
         stderr=subprocess.STDOUT,
         text=True,
         bufsize=1,
+        shell=(sys.platform == "win32"),
     )
     processes.append((frontend_proc, "Frontend"))
     threading.Thread(target=stream_output, args=(frontend_proc.stdout, "[FRONTEND]", MAGENTA), daemon=True).start()

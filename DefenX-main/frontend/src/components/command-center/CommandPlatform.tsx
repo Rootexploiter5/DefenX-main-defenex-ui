@@ -1,4 +1,4 @@
-import { Bot, FileText, Loader2, Radar, ScanSearch, Shield, X, CheckCircle2, AlertTriangle, Terminal } from "lucide-react";
+import { Bot, FileText, Loader2, Radar, ScanSearch, Shield, X, CheckCircle2, AlertTriangle, Terminal, Monitor } from "lucide-react";
 import { useState, type ReactNode } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { api } from "../../services/api";
@@ -150,10 +150,10 @@ export function CommandPlatform() {
   }
 
   const items = [
-    { id: "scan", icon: ScanSearch, t: "Scan Now", s: "Deep Behavioral Audit", run: scan, cls: "left-[10%] bottom-[8%] w-[15%] -rotate-[6deg]" },
-    { id: "monitor", icon: Shield, t: "Monitor", s: "Live Telemetry Feed", run: () => go("monitor"), cls: "left-[28%] bottom-[5%] w-[14%] -rotate-[3deg]" },
-    { id: "report", icon: FileText, t: "Report", s: "Export Forensic Log", run: report, cls: "left-[58%] bottom-[5%] w-[14%] rotate-[3deg]" },
-    { id: "protect", icon: Radar, t: "Protect", s: "Engage Policy Rules", run: protect, cls: "left-[76%] bottom-[8%] w-[15%] rotate-[6deg]" },
+    { id: "scan", icon: ScanSearch, t: "Scan Now", s: "Check your device", run: scan, cls: "left-[10%] bottom-[8%] w-[15%] -rotate-[6deg]" },
+    { id: "monitor", icon: Monitor, t: "Monitor", s: "Live activity", run: () => go("monitor"), cls: "left-[28%] bottom-[5%] w-[14%] -rotate-[3deg]" },
+    { id: "report", icon: FileText, t: "Report", s: "Generate report", run: report, cls: "left-[58%] bottom-[5%] w-[14%] rotate-[3deg]" },
+    { id: "protect", icon: Shield, t: "Protect", s: "Apply security rules", run: protect, cls: "left-[76%] bottom-[8%] w-[15%] rotate-[6deg]" },
   ];
 
   return (
@@ -165,14 +165,14 @@ export function CommandPlatform() {
             key={id} 
             onClick={run} 
             disabled={busy !== null}
-            className={`platform-action absolute text-center text-[#f8f5f0] disabled:opacity-60 ${cls}`} 
+            className={`platform-action absolute text-center text-[#f8f5f0] disabled:opacity-60 transition-transform duration-200 hover:scale-105 ${cls}`} 
             aria-label={`${t}: ${s}`}
           >
             <span className="mx-auto mb-1 grid place-items-center text-[#ffe2a0]">
               {busy === id ? <Loader2 size={21} className="animate-spin text-[#d9ad62]" /> : <Icon size={21} />}
             </span>
-            <span className="block text-[13px] font-semibold text-[#f8f5f0]">{t}</span>
-            <span className="block text-[9.5px] font-medium text-[#a7a3ad]">{s}</span>
+            <span className="block text-[13px] font-bold text-[#f8f5f0]">{t}</span>
+            <span className="block text-[9.5px] font-medium text-[#c7bcba]">{s}</span>
           </button>
         ))}
 
@@ -180,12 +180,12 @@ export function CommandPlatform() {
         <button 
           onClick={() => go("assistant")} 
           aria-label="DEFENEX AI: Analyze and explain"
-          className="platform-action absolute bottom-0 left-1/2 h-[112px] w-[21%] -translate-x-1/2 rounded-t-[54px] border border-[#d9ad62]/70 bg-gradient-to-b from-[#4b1027]/95 via-[#2a0813] to-[#12050b] text-center text-[#f8f5f0] shadow-[0_0_35px_rgba(75,16,39,0.7)]"
+          className="platform-action absolute bottom-0 left-1/2 h-[112px] w-[21%] -translate-x-1/2 rounded-t-[54px] border border-[#d9ad62]/70 bg-gradient-to-b from-[#4b1027]/95 via-[#2a0813] to-[#12050b] text-center text-[#f8f5f0] shadow-[0_0_35px_rgba(75,16,39,0.7)] transition-transform duration-200 hover:scale-105"
         >
-          <span className="absolute -top-7 left-1/2 size-14 -translate-x-1/2 rounded-full border border-[#d9ad62]/60 bg-[radial-gradient(circle_at_35%_30%,#ff7a8a,#ef4444_45%,#3a0715)] shadow-[0_0_24px_rgba(239,68,68,0.7)]" />
+          <span className="absolute -top-7 left-1/2 size-14 -translate-x-1/2 rounded-full border border-[#d9ad62]/70 bg-[radial-gradient(circle_at_35%_30%,#ff8fa3,#ef4444_45%,#3a0715)] shadow-[0_0_24px_rgba(239,68,68,0.7)]" />
           <Bot size={0} className="hidden" />
-          <span className="mt-[50px] block text-[13px] font-bold tracking-wide text-[#ffe2a0]">DEFENEX AI</span>
-          <span className="block text-[9.5px] font-medium text-[#a7a3ad]">Neural Incident Copilot</span>
+          <span className="mt-[48px] block text-[13px] font-bold tracking-wide text-[#ffe2a0]">DEFENEX AI</span>
+          <span className="block text-[9.5px] font-medium text-[#c7bcba]">Analyze & Explain</span>
         </button>
       </div>
 

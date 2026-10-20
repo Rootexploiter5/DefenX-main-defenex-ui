@@ -10,15 +10,23 @@ interface Props {
   sub?: string;
   warn?: boolean;           // red accent
   big?: boolean;
+  theme?: "light" | "dark";
+  gradientColors?: [string, string];
 }
 
-/** Circular champagne-gold gauge with tactical dark glow. */
-export function Gauge({ value, size = 84, stroke = 7, label, display, sub, warn, big }: Props) {
+/** Circular champagne-gold gauge with tactical dark or ivory glow. */
+export function Gauge({ value, size = 84, stroke = 7, label, display, sub, warn, big, theme = "dark", gradientColors }: Props) {
   const id = useId();
   const r = (size - stroke) / 2;
   const c = 2 * Math.PI * r;
   const pct = value === null ? 0 : Math.max(0, Math.min(100, value));
-  const color = warn ? ["#ff7a8a", "#ef4444"] : ["#FFE2A0", "#D9AD62"];
+  const color = gradientColors 
+    ? gradientColors 
+    : warn 
+      ? ["#ef4444", "#dc2626"] 
+      : ["#d9ad62", "#b8860b"];
+
+  const isLight = theme === "light";
 
   return (
     <div 
@@ -39,7 +47,7 @@ export function Gauge({ value, size = 84, stroke = 7, label, display, sub, warn,
           cy={size / 2} 
           r={r} 
           fill="none" 
-          stroke="rgba(217, 173, 98, 0.15)" 
+          stroke={isLight ? "rgba(217, 173, 98, 0.25)" : "rgba(217, 173, 98, 0.15)"} 
           strokeWidth={stroke}
           strokeDasharray={value === null ? "3 6" : undefined} 
         />
@@ -56,16 +64,28 @@ export function Gauge({ value, size = 84, stroke = 7, label, display, sub, warn,
             initial={{ strokeDashoffset: c }} 
             animate={{ strokeDashoffset: c * (1 - pct / 100) }}
             transition={{ duration: 0.9, ease: "easeOut" }}
-            style={{ filter: warn ? "drop-shadow(0 0 6px rgba(239,68,68,0.7))" : "drop-shadow(0 0 6px rgba(217,173,98,0.6))" }} 
+            style={{ 
+              filter: isLight 
+                ? "drop-shadow(0 2px 4px rgba(217,173,98,0.35))" 
+                : warn ? "drop-shadow(0 0 6px rgba(239,68,68,0.7))" : "drop-shadow(0 0 6px rgba(217,173,98,0.6))" 
+            }} 
           />
         )}
       </svg>
       <div className="absolute inset-0 grid place-content-center text-center leading-tight">
-        {label && <span className={big ? "hidden" : "font-mono text-[9.5px] uppercase tracking-wider text-[#a7a3ad]"}>{label}</span>}
-        <span className={`${big ? "text-3xl font-mono tracking-tight" : "text-sm font-mono"} font-bold text-[#f8f5f0]`}>
+        {label && (
+          <span className={big ? "hidden" : `font-mono text-[9px] uppercase tracking-wider ${isLight ? "text-[#78665c]" : "text-[#a7a3ad]"}`}>
+            {label}
+          </span>
+        )}
+        <span className={`${big ? "text-[32px] tracking-tight" : "text-sm"} font-bold ${isLight ? "text-[#231219]" : "text-[#f8f5f0]"}`}>
           {display ?? (value === null ? "N/A" : `${Math.round(pct)}%`)}
         </span>
-        {sub && <span className="font-mono text-[10px] text-[#ffe2a0] tracking-wide">{sub}</span>}
+        {sub && (
+          <span className={`text-[10px] tracking-wide font-medium ${isLight ? "text-[#8c7456]" : "text-[#ffe2a0]"}`}>
+            {sub}
+          </span>
+        )}
       </div>
     </div>
   );

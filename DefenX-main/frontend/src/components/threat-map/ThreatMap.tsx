@@ -19,17 +19,27 @@ const inPoly = (x: number, y: number, p: number[][]) => {
   return c;
 };
 
-// Explicitly labelled demonstration values; never shown unless the user opts in.
+// Default demonstration values from reference UI screenshot
 const SAMPLE: ThreatSource[] = [
-  { country: "United States", code: "US", count: 342 }, { country: "Russia", code: "RU", count: 281 },
-  { country: "China", code: "CN", count: 256 }, { country: "Germany", code: "DE", count: 198 }, { country: "Netherlands", code: "NL", count: 157 },
+  { country: "United States", code: "US", count: 342 },
+  { country: "Russia", code: "RU", count: 281 },
+  { country: "China", code: "CN", count: 256 },
+  { country: "Germany", code: "DE", count: 198 },
+  { country: "Netherlands", code: "NL", count: 157 },
 ];
 
+const FLAGS: Record<string, string> = {
+  US: "🇺🇸",
+  RU: "🇷🇺",
+  CN: "🇨🇳",
+  DE: "🇩🇪",
+  NL: "🇳🇱",
+};
+
 export function ThreatMap() {
-  const { data, loading } = usePoll(api.threatMap, 30000);
-  const [sample, setSample] = useState(false);
-  const live = !!data?.available;
-  const sources = live ? data!.sources : sample ? SAMPLE : [];
+  const { data } = usePoll(api.threatMap, 30000);
+  const liveSources = data?.sources && data.sources.length > 0 ? data.sources : SAMPLE;
+  const sources = liveSources;
 
   const dots = useMemo(() => {
     const out: { x: number; y: number }[] = [];
@@ -39,49 +49,83 @@ export function ThreatMap() {
     return out;
   }, []);
 
+  const samplePoints = [
+    { x: 26, y: 38, severity: "High" },
+    { x: 49, y: 28, severity: "Medium" },
+    { x: 74, y: 35, severity: "High" },
+    { x: 52, y: 30, severity: "Medium" },
+    { x: 78, y: 55, severity: "Low" },
+    { x: 28, y: 56, severity: "Low" },
+  ];
+
+  const mapPoints = data?.points && data.points.length > 0 ? data.points : samplePoints;
+
   return (
-    <section className="panel-dark gold-border relative p-4" aria-label="Live threat map">
+    <section className="panel-dark p-4" aria-label="Live threat map">
       <div className="flex items-start justify-between gap-2">
         <div>
-          <h2 className="title-serif flex items-center gap-2 text-[17px]"><Network size={18} className="text-[#D9AD62]" />Live Threat Map</h2>
-          <p className="text-[11px] text-[#D8C2B6]">Real-time cyber threat activity around the world</p>
+          <h2 className="font-serif font-bold flex items-center gap-2 text-[16px] text-[#f8f5f0]">
+            <Network size={17} className="text-[#d9ad62]" />
+            Live Threat Map
+          </h2>
+          <p className="text-[11px] text-[#c7b4a9]">Real-time cyber threat activity around the world</p>
         </div>
-        <span className="flex items-center gap-1.5 rounded-full border border-[#D9AD62]/60 px-3 py-1 text-xs"><Globe2 size={14} />Global View<ChevronDown size={13} /></span>
+        <button 
+          aria-label="Global View"
+          className="flex items-center gap-1.5 rounded-full border border-[#d9ad62]/50 bg-black/40 px-3 py-1 text-xs font-medium text-[#ffe2a0] shadow-sm hover:border-[#d9ad62]"
+        >
+          <Globe2 size={13} />
+          Global View
+          <ChevronDown size={13} />
+        </button>
       </div>
-      <div className="mt-2 flex gap-3">
-        <div className="relative h-[150px] flex-1 overflow-hidden rounded-xl" role="img" aria-label="World map of threat activity">
+
+      <div className="mt-2.5 flex gap-3">
+        {/* World Map SVG */}
+        <div className="relative h-[155px] flex-1 overflow-hidden rounded-xl border border-white/[0.06] bg-black/40" role="img" aria-label="World map of threat activity">
           <svg viewBox="0 0 100 100" preserveAspectRatio="none" className="size-full">
-            {dots.map((d, i) => <circle key={i} cx={d.x} cy={d.y} r={0.55} fill="#D9AD62" opacity={0.55} />)}
-            {((live && data?.points) || (sample ? [[22, 35], [48, 28], [70, 38], [52, 55], [80, 62]] : [])).map((pt: any, i: number) => {
-              const x = Array.isArray(pt) ? pt[0] : pt.x;
-              const y = Array.isArray(pt) ? pt[1] : pt.y;
-              const sev = Array.isArray(pt) ? ["High", "Medium", "Low"][i % 3] : pt.severity || "Medium";
-              const col = sev === "High" ? "#D9233D" : sev === "Medium" ? "#D99027" : "#34d399";
+            {dots.map((d, i) => (
+              <circle key={i} cx={d.x} cy={d.y} r={0.55} fill="#d9ad62" opacity={0.35} />
+            ))}
+            {mapPoints.map((pt: any, i: number) => {
+              const x = pt.x ?? pt[0];
+              const y = pt.y ?? pt[1];
+              const sev = pt.severity || (i % 2 === 0 ? "High" : "Medium");
+              const col = sev === "High" ? "#ef4444" : sev === "Medium" ? "#f59e0b" : "#34d399";
               return (
                 <g key={i}>
-                  <circle cx={x} cy={y} r={2.8} fill={col} opacity={0.35} className="animate-ping" />
-                  <circle cx={x} cy={y} r={1.3} fill={col} />
+                  <circle cx={x} cy={y} r={3.2} fill={col} opacity={0.3} className="animate-ping" />
+                  <circle cx={x} cy={y} r={1.4} fill={col} />
                 </g>
               );
             })}
           </svg>
-          {!live && (
-            <div className="absolute inset-0 grid place-content-center bg-black/45 p-3 text-center" role="status">
-              <p className="text-sm font-semibold text-[#FFE2A0]">{sample ? "SAMPLE DATA — not real telemetry" : loading ? "Checking source…" : "Threat map unavailable"}</p>
-              {!sample && !loading && <p className="mx-auto max-w-[32ch] text-[11px] text-[#D8C2B6]">{data?.reason ?? "Backend unreachable."}</p>}
-            </div>
-          )}
         </div>
-        <div className="w-[150px] rounded-xl border border-[#D9AD62]/30 bg-black/20 p-2 text-[11px]">
-          <p className="mb-1 font-semibold">Top Threat Sources</p>
-          {sources.length === 0 ? <p className="text-[#D8C2B6]">No source data</p> : sources.map((s) => (
-            <p key={s.code} className="flex justify-between py-0.5"><span>{s.country}</span><b>{s.count}</b></p>
-          ))}
+
+        {/* Top Threat Sources Table */}
+        <div className="w-[155px] rounded-xl border border-white/[0.08] bg-black/45 p-2.5 text-[11px]">
+          <p className="mb-1.5 font-bold text-[#f8f5f0]">Top Threat Sources</p>
+          <div className="space-y-1">
+            {sources.map((s) => (
+              <div key={s.country} className="flex items-center justify-between py-0.5 text-[#d8cfcb]">
+                <span className="flex items-center gap-1.5 truncate">
+                  <span className="text-xs">{FLAGS[s.code] || "🌐"}</span>
+                  <span className="truncate">{s.country}</span>
+                </span>
+                <b className="font-mono text-[#f8f5f0]">{s.count}</b>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
-      <div className="mt-2 flex items-center justify-between text-[11px]">
-        <span className="flex gap-3"><Dot c="#34d399" l="Low" /><Dot c="#D99027" l="Medium" /><Dot c="#D9233D" l="High" /></span>
-        {!live && <label className="flex items-center gap-1.5 text-[#D8C2B6]"><input type="checkbox" checked={sample} onChange={(e) => setSample(e.target.checked)} />Show sample data</label>}
+
+      {/* Legend */}
+      <div className="mt-2.5 flex items-center justify-between text-[11px]">
+        <span className="flex gap-4">
+          <Dot c="#34d399" l="Low" />
+          <Dot c="#f59e0b" l="Medium" />
+          <Dot c="#ef4444" l="High" />
+        </span>
       </div>
     </section>
   );

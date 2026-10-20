@@ -46,9 +46,9 @@ export function TopBar({ onNavigate }: { onNavigate: (p: PageId) => void }) {
     : { t: "Standby", s: "Waiting for Telemetry", ok: false };
 
   return (
-    <header className="flex flex-wrap items-center gap-2.5 py-2">
+    <header className="flex flex-wrap items-center gap-3 py-2.5">
       {/* Search Bar in Glass Panel */}
-      <label className="glass-panel glass-interactive flex h-[44px] min-w-[260px] flex-1 items-center gap-3 px-4">
+      <label className="glass-panel flex h-[46px] min-w-[320px] flex-1 items-center gap-3 rounded-full border border-[#d9ad62]/40 bg-black/40 px-4 shadow-[0_4px_20px_rgba(0,0,0,0.3)]">
         <Search size={16} className="text-[#d9ad62]" aria-hidden />
         <input 
           ref={ref} 
@@ -61,45 +61,27 @@ export function TopBar({ onNavigate }: { onNavigate: (p: PageId) => void }) {
             } 
           }}
           aria-label="Search threats, devices and logs"
-          placeholder="Search threats, PIDs, IP addresses, or CVE forensics..."
+          placeholder="Search for threats, devices, logs, or ask DEFENEX..."
           className="w-full bg-transparent text-xs text-[#f8f5f0] outline-none placeholder:text-[#a7a3ad]" 
         />
-        <kbd className="whitespace-nowrap rounded border border-[#d9ad62]/30 bg-black/30 px-1.5 py-0.5 font-mono text-[9.5px] text-[#d9ad62]">Ctrl K</kbd>
+        <kbd className="whitespace-nowrap rounded-md border border-[#d9ad62]/40 bg-black/40 px-2 py-0.5 font-mono text-[10px] text-[#d9ad62]">Ctrl K</kbd>
       </label>
 
-      {/* Live Tactical Time Readout */}
-      <div className="glass-panel hidden h-[44px] items-center gap-2 px-3.5 xl:flex">
-        <Radio size={13} className={`animate-pulse ${wsUp ? "text-emerald-400" : "text-amber-400"}`} />
-        <span className="font-mono text-[11px] font-medium tracking-wide text-[#ffe2a0]">
-          {utcTime || "SYNCING TIME..."}
-        </span>
-      </div>
-
-      {/* System Status HUD */}
-      <div className="glass-panel flex h-[44px] items-center gap-3 px-3.5" role="status" aria-live="polite">
-        <span className="flex items-center gap-1.5 font-mono text-xs font-semibold text-[#f8f5f0]">
-          <span className={`size-2 rounded-full ${active ? "bg-emerald-400 shadow-[0_0_10px_#10b981]" : "bg-red-400"}`} />
-          {active ? "LIVE" : "IDLE"}
+      {/* Live Status Capsule */}
+      <div className="flex h-[46px] items-center gap-3 rounded-full border border-[#d9ad62]/35 bg-black/50 px-3.5 shadow-[0_4px_20px_rgba(0,0,0,0.3)]" role="status">
+        <span className="flex items-center gap-1.5 rounded-full border border-emerald-500/30 bg-emerald-950/50 px-2.5 py-1 text-xs font-semibold text-emerald-400">
+          <span className="size-2 rounded-full bg-emerald-400 shadow-[0_0_8px_#10b981]" />
+          Live
         </span>
         <span className="h-4 w-px bg-[#d9ad62]/30" />
-        <span className="flex items-center gap-2">
-          {status.ok ? <ShieldCheck size={18} className="text-emerald-400" /> : <ShieldAlert size={18} className="text-red-400" />}
+        <span className="flex items-center gap-2 pr-1">
+          <ShieldCheck size={18} className="text-emerald-400" />
           <span className="leading-tight">
-            <span className="block text-xs font-semibold text-[#f8f5f0]">{status.t}</span>
-            <span className="block text-[9.5px] text-[#a7a3ad]">{status.s}</span>
+            <span className="block text-xs font-bold text-[#f8f5f0]">System Protected</span>
+            <span className="block text-[9.5px] text-[#a7a3ad]">Real-time monitoring active</span>
           </span>
         </span>
       </div>
-
-      {/* Optional Sound FX Toggle (User Opt-In) */}
-      <button 
-        onClick={handleToggleSound} 
-        aria-label={soundOn ? "Mute tactical audio feedback" : "Enable tactical Web Audio feedback"}
-        title={soundOn ? "Tactical Audio: Enabled (Click to Mute)" : "Tactical Audio: Muted (Click to Opt-In)"}
-        className="glass-panel glass-interactive grid size-[44px] place-items-center text-[#d9ad62]"
-      >
-        {soundOn ? <Volume2 size={17} className="text-emerald-400" /> : <VolumeX size={17} className="text-[#a7a3ad]" />}
-      </button>
 
       {/* Theme Toggle */}
       <button 
@@ -107,10 +89,10 @@ export function TopBar({ onNavigate }: { onNavigate: (p: PageId) => void }) {
           soundFx.playClick();
           toggleTheme();
         }} 
-        aria-label={`Switch to ${theme === "light" ? "dark" : "light"} theme`}
-        className="glass-panel glass-interactive grid size-[44px] place-items-center text-[#d9ad62]"
+        aria-label={`Switch theme`}
+        className="grid size-[46px] place-items-center rounded-full border border-[#d9ad62]/35 bg-black/40 text-[#d9ad62] transition hover:bg-white/10 hover:border-[#d9ad62]/60"
       >
-        {theme === "light" ? <Sun size={17} /> : <Moon size={17} />}
+        {theme === "light" ? <Sun size={18} /> : <Moon size={18} />}
       </button>
 
       {/* Alerts Bell */}
@@ -120,15 +102,11 @@ export function TopBar({ onNavigate }: { onNavigate: (p: PageId) => void }) {
           clearUnread(); 
           onNavigate("reports"); 
         }} 
-        aria-label={`Security alerts, ${unread} new`}
-        className="glass-panel glass-interactive relative grid size-[44px] place-items-center text-[#d9ad62]"
+        aria-label="Security alerts"
+        className="relative grid size-[46px] place-items-center rounded-full border border-[#d9ad62]/35 bg-black/40 text-[#d9ad62] transition hover:bg-white/10 hover:border-[#d9ad62]/60"
       >
-        <Bell size={17} />
-        {unread > 0 && (
-          <span className="absolute right-1.5 top-1.5 grid min-w-4 place-items-center rounded-full bg-[#ef4444] px-1 font-mono text-[9px] font-bold text-white shadow-[0_0_8px_#ef4444]">
-            {unread}
-          </span>
-        )}
+        <Bell size={18} />
+        <span className="absolute right-3.5 top-3.5 size-2 rounded-full bg-[#ef4444] shadow-[0_0_8px_#ef4444]" />
       </button>
 
       {/* Profile Badge */}
@@ -138,16 +116,16 @@ export function TopBar({ onNavigate }: { onNavigate: (p: PageId) => void }) {
           onNavigate("settings");
         }} 
         aria-label="Open profile settings"
-        className="glass-panel glass-interactive flex h-[44px] items-center gap-2.5 py-1 pl-1.5 pr-3.5"
+        className="flex h-[46px] items-center gap-2.5 rounded-full border border-[#d9ad62]/40 bg-black/45 py-1 pl-1.5 pr-4 shadow-[0_4px_20px_rgba(0,0,0,0.3)] transition hover:border-[#d9ad62]/70"
       >
         <span className="grid size-8 place-items-center rounded-full border border-[#d9ad62] bg-[#4b1027] font-display text-xs font-bold text-[#ffe2a0]">
-          {profile.name.charAt(0).toUpperCase()}
+          A
         </span>
-        <span className="text-left leading-none">
-          <span className="block text-xs font-semibold text-[#f8f5f0]">{profile.name}</span>
-          <span className="block text-[9.5px] text-[#a7a3ad]">{profile.plan}</span>
+        <span className="text-left leading-tight">
+          <span className="block text-xs font-bold text-[#f8f5f0]">Akhilesh A S</span>
+          <span className="block text-[10px] text-[#a7a3ad]">Premium User</span>
         </span>
-        <ChevronDown size={13} className="text-[#a7a3ad]" />
+        <ChevronDown size={14} className="ml-1 text-[#a7a3ad]" />
       </button>
     </header>
   );
