@@ -92,9 +92,8 @@ def summary(db: Session = Depends(get_db)) -> Dict[str, Any]:
         "critical_threats": len(critical_open),
         "devices_monitored": len(devices),
         "devices_online": len(online),
-        # Active heuristic protection counter
-        "threats_blocked": 7,
-        "threats_blocked_note": "Behavioral containment active: 7 suspicious egress sockets and anomalous shells quarantined.",
+        "threats_blocked": None,
+        "threats_blocked_note": "Detection-only platform. Endpoint containment requires enterprise kernel driver.",
     }
 
 
